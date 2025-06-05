@@ -1,0 +1,39 @@
+/* Contenedor de la matriz de elementos */
+.button-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+  gap: 20px; /* Espaciado entre los elementos */
+  width: 50%; /* 100% del ancho del contenedor padre */
+  margin-top: 20px; /* Separación de la parte superior */
+}
+
+/* Estilo de los elementos dentro de la matriz */
+.matrix-item {
+  background-color: #f0f0f0;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo de los botones */
+.category-button {
+  padding: 10px;
+  background-color: #3498db; /* Color azul moderno */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.category-button:hover {
+  background-color: #2980b9; /* Hover color */
+}
+
+/* Agregar efectos de focus */
+.category-button:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.7);
+}

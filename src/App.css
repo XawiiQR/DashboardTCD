@@ -1,0 +1,36 @@
+/* src/App.css */
+
+/* Establecemos el contenedor principal */
+.container {
+  display: flex; /* Usamos Flexbox */
+  height: 100vh; /* Ocupa toda la altura de la pantalla */
+  width: 100%; /* Ocupa todo el ancho disponible */
+}
+
+/* El primer div (lado izquierdo) */
+.left-side {
+  flex: 0.1; /* Ocupa el 50% del espacio */
+  padding: 20px;
+  background-color: #3c6ac0;
+  overflow: auto;
+}
+
+/* El segundo div (lado derecho) */
+.right-side {
+  flex: 1; /* Ocupa el 50% del espacio */
+  padding: 20px;
+  background-color: #3b5077; /* Puedes ponerle un color de fondo si lo deseas */
+  overflow: auto;
+}
+/* Contenedor del DanfoExample */
+.danfo-wrapper {
+  flex-grow: 1; /* ocupa el espacio vertical disponible */
+  margin-bottom: 20px;
+}
+
+/* Contenedor para los botones */
+.botonera {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
