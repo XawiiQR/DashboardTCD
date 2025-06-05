@@ -12,7 +12,7 @@ const Rangos2: React.FC<Props> = ({ dataFrame, attribute }) => {
   const pieChartRef = useRef<SVGSVGElement>(null);
 
   const rawValues = dataFrame[attribute]?.values as (number | null | undefined)[];
-  const values: number[] = rawValues?.filter((v): v is number => v !== null && !isNaN(v)) || [];
+  const values: number[] = rawValues?.filter((v): v is number => v !== null && v !== undefined && !isNaN(v)) || [];
   const totalPopulation = (dataFrame["total_population"]?.values || []) as number[];
 
   const nullCount = rawValues?.length - values.length || 0;
