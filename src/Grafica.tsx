@@ -15,13 +15,12 @@ interface PieData {
 }
 
 const Grafica: React.FC<Props> = ({ dataFrame }) => {
-  const svgRef1 = useRef<SVGSVGElement>(null);
-  const svgRef2 = useRef<SVGSVGElement>(null);
-  const legendRef1 = useRef<HTMLDivElement>(null);
-  const legendRef2 = useRef<HTMLDivElement>(null);
-  const [selectedData, setSelectedData] = useState<{dataFrame: dfd.DataFrame, key: string} | null>(null);
+  const svgRef1 = useRef<SVGSVGElement | null>(null); // Mantener `null` como valor inicial para referencias
+  const svgRef2 = useRef<SVGSVGElement | null>(null);
+  const legendRef1 = useRef<HTMLDivElement | null>(null); // Mantener `null` como valor inicial
+  const legendRef2 = useRef<HTMLDivElement | null>(null); // Mantener `null` como valor inicial
+  const [selectedData, setSelectedData] = useState<{ dataFrame: dfd.DataFrame, key: string } | null>(null);
 
-  // Colores consistentes para las categorías
   const colors = {
     white: "#4e79a7",
     black: "#f28e2b",
@@ -29,7 +28,6 @@ const Grafica: React.FC<Props> = ({ dataFrame }) => {
     hispanic: "#76b7b2"
   };
 
-  // Calcular el total ponderado de cada raza
   let weightedWhite = 0;
   let weightedBlack = 0;
   let weightedAsian = 0;
@@ -41,7 +39,6 @@ const Grafica: React.FC<Props> = ({ dataFrame }) => {
   let weightedAsian_inflow = 0;
   let weightedHispanic_inflow = 0;
 
-  // Iterar sobre cada registro y calcular el valor ponderado
   dataFrame["total_population"].values.forEach((population: number, index: number) => {
     weightedWhite += dataFrame["white"].values[index] * population;
     weightedBlack += dataFrame["black"].values[index] * population;
@@ -56,7 +53,6 @@ const Grafica: React.FC<Props> = ({ dataFrame }) => {
     totalPopulation += population;
   });
 
-  // Datos para los gráficos
   const raceData: PieData[] = [
     { label: "White", value: (weightedWhite / totalPopulation) * 100, color: colors.white, key: "white" },
     { label: "Black", value: (weightedBlack / totalPopulation) * 100, color: colors.black, key: "black" },
@@ -71,41 +67,35 @@ const Grafica: React.FC<Props> = ({ dataFrame }) => {
     { label: "Hispanic Inflow", value: (weightedHispanic_inflow / totalPopulation) * 100, color: colors.hispanic, key: "hispanic_inflow" }
   ];
 
-  // Configuración de los gráficos
   const width = 300;
   const height = 300;
   const radius = Math.min(width, height) / 2 - 20;
 
-  // Función para manejar el click en un segmento
-  const handleSegmentClick = (data: PieData, isInflow: boolean) => {
+  const handleSegmentClick = (data: PieData, _isInflow: boolean) => {
     setSelectedData({
       dataFrame: dataFrame,
       key: data.key
     });
   };
 
-  // Función para dibujar un gráfico de pastel con leyenda
   const drawPieChart = (
-    svgRef: React.RefObject<SVGSVGElement>,
-    legendRef: React.RefObject<HTMLDivElement>,
+    svgRef: React.RefObject<SVGSVGElement | null>,
+    legendRef: React.RefObject<HTMLDivElement | null>, // Usamos el tipo HTMLDivElement | null para las leyendas
     data: PieData[],
     title: string,
     isInflow: boolean
   ) => {
     if (!svgRef.current || !legendRef.current) return;
 
-    // Limpiar SVG y leyenda existentes
-    d3.select(svgRef.current).selectAll("*").remove();
-    legendRef.current.innerHTML = '';
+    d3.select(svgRef.current!).selectAll("*").remove(); // Non-null assertion for svgRef
+    legendRef.current!.innerHTML = ''; // Non-null assertion for legendRef
 
-    // Crear SVG
-    const svg = d3.select(svgRef.current)
+    const svg = d3.select(svgRef.current!)
       .attr("width", width)
       .attr("height", height + 40)
       .append("g")
       .attr("transform", `translate(${width / 2},${height / 2 + 20})`);
 
-    // Añadir título
     svg.append("text")
       .attr("y", -height / 2 - 10)
       .attr("text-anchor", "middle")
@@ -114,20 +104,18 @@ const Grafica: React.FC<Props> = ({ dataFrame }) => {
       .style("font-weight", "bold")
       .style("fill", "#000");
 
-    // Crear el layout del pastel
     const pie = d3.pie<PieData>().value(d => d.value);
     const arc = d3.arc<d3.PieArcDatum<PieData>>()
       .innerRadius(0)
       .outerRadius(radius);
 
-    // Dibujar los segmentos con interacción
     const arcs = svg.selectAll("arc")
       .data(pie(data))
       .enter()
       .append("g")
       .attr("class", "arc")
       .style("cursor", "pointer")
-      .on("click", (event, d) => handleSegmentClick(d.data, isInflow));
+      .on("click", (_event, d) => handleSegmentClick(d.data, isInflow));
 
     arcs.append("path")
       .attr("d", arc)
@@ -141,7 +129,6 @@ const Grafica: React.FC<Props> = ({ dataFrame }) => {
         d3.select(this).attr("opacity", 1);
       });
 
-    // Añadir porcentajes dentro de las porciones
     arcs.append("text")
       .attr("transform", d => `translate(${arc.centroid(d)})`)
       .attr("text-anchor", "middle")
@@ -149,8 +136,7 @@ const Grafica: React.FC<Props> = ({ dataFrame }) => {
       .style("font-size", "10px")
       .style("fill", "#fff");
 
-    // Crear leyenda interactiva
-    const legend = d3.select(legendRef.current)
+    const legend = d3.select(legendRef.current!)
       .style("display", "flex")
       .style("flex-direction", "column")
       .style("gap", "5px")
@@ -180,7 +166,6 @@ const Grafica: React.FC<Props> = ({ dataFrame }) => {
     });
   };
 
-  // Dibujar los gráficos cuando los datos cambien
   useEffect(() => {
     drawPieChart(svgRef1, legendRef1, raceData, "Distribución Racial", false);
     drawPieChart(svgRef2, legendRef2, inflowData, "Distribución Inflow", true);

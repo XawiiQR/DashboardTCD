@@ -9,6 +9,10 @@ const DateComponente: React.FC<Props> = ({ dataFrame }) => {
     <div>
       <h3>Componente de Fecha</h3>
       <p>Aquí puedes visualizar o manipular las fechas.</p>
+
+      <h3>Componente 2</h3>
+      <p>Filas: {dataFrame.shape[0]}</p>
+      <p>Columnas: {dataFrame.shape[1]}</p>
       {/* Añadir cualquier funcionalidad adicional para el atributo de tipo "date_range" */}
     </div>
   );
