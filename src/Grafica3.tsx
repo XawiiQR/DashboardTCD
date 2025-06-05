@@ -15,9 +15,9 @@ interface ActivityData {
 }
 
 const Grafica3: React.FC<Props> = ({ dataFrame }) => {
-  const svgRef1 = useRef<SVGSVGElement>(null);
-  const svgRef2 = useRef<SVGSVGElement>(null);
-  const [selectedData, setSelectedData] = useState<{dataFrame: dfd.DataFrame, key: string} | null>(null);
+  const svgRef1 = useRef<SVGSVGElement | null>(null);
+  const svgRef2 = useRef<SVGSVGElement | null>(null);
+  const [selectedData, setSelectedData] = useState<{ dataFrame: dfd.DataFrame, key: string } | null>(null);
   const [selectedNeighborhood, setSelectedNeighborhood] = useState<string | null>(null);
   const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
 
@@ -39,7 +39,7 @@ const Grafica3: React.FC<Props> = ({ dataFrame }) => {
     // Extraer los GEOIDs como nombres de vecindarios
     if (dataFrame) {
       const geoids = dataFrame["GEOID"].values as string[];
-      setNeighborhoods(geoids);
+      setNeighborhoods(geoids); // Establecer los vecindarios en el estado
     }
   }, [dataFrame]);
 
@@ -47,7 +47,7 @@ const Grafica3: React.FC<Props> = ({ dataFrame }) => {
   const calculateWeightedAverages = () => {
     const weightedAverages: ActivityData[] = [];
     let totalPopulation = 0;
-    const sums: {[key: string]: number} = {};
+    const sums: { [key: string]: number } = {};
 
     // Inicializar sumas
     activityCategories.forEach(cat => {
@@ -96,18 +96,18 @@ const Grafica3: React.FC<Props> = ({ dataFrame }) => {
   };
 
   const handleNeighborhoodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedNeighborhood(e.target.value);
+    setSelectedNeighborhood(e.target.value); // Actualizar el vecindario seleccionado
   };
 
   const drawBarChart = (
-    svgRef: React.RefObject<SVGSVGElement>,
+    svgRef: React.RefObject<SVGSVGElement | null>,
     data: ActivityData[],
     title: string
   ) => {
     if (!svgRef.current) return;
 
     // Clear existing elements
-    d3.select(svgRef.current).selectAll("*").remove();
+    d3.select(svgRef.current!).selectAll("*").remove(); // Non-null assertion for svgRef
 
     // Margins and dimensions
     const margin = { top: 50, right: 30, bottom: 70, left: 60 };
@@ -115,7 +115,7 @@ const Grafica3: React.FC<Props> = ({ dataFrame }) => {
     const height = 400 - margin.top - margin.bottom;
 
     // Create SVG
-    const svg = d3.select(svgRef.current)
+    const svg = d3.select(svgRef.current!)
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
@@ -176,7 +176,7 @@ const Grafica3: React.FC<Props> = ({ dataFrame }) => {
       .attr("height", d => height - y(d.value))
       .attr("fill", d => d.color)
       .style("cursor", "pointer")
-      .on("mouseover", function(event, d) {
+      .on("mouseover", function(_event, d) {
         d3.select(this).attr("opacity", 0.8);
         
         // Show tooltip
@@ -194,7 +194,7 @@ const Grafica3: React.FC<Props> = ({ dataFrame }) => {
         d3.select(this).attr("opacity", 1);
         svg.selectAll(".tooltip").remove();
       })
-      .on("click", (event, d) => handleBarClick(d));
+      .on("click", (_event, d) => handleBarClick(d));
   };
 
   // Dibujar gráficos cuando cambian los datos o la selección
@@ -227,12 +227,13 @@ const Grafica3: React.FC<Props> = ({ dataFrame }) => {
           <h2>Análisis de Movilidad y Actividades</h2>
           <p>Visualización de patrones de visita a diferentes tipos de lugares en Boston</p>
         </div>
-        {/*
+
+        {/* Dropdown para seleccionar el vecindario */}
         <div>
           <label htmlFor="neighborhood-select">Seleccionar vecindario: </label>
           <select 
             id="neighborhood-select"
-            onChange={handleNeighborhoodChange}
+            onChange={handleNeighborhoodChange} // Conectamos el manejador
             style={{ padding: "5px", borderRadius: "4px" }}
           >
             <option value="">-- Promedio de la ciudad --</option>
@@ -243,7 +244,7 @@ const Grafica3: React.FC<Props> = ({ dataFrame }) => {
             ))}
           </select>
         </div>
-                */}
+
         <div style={{ border: "1px solid #ddd", borderRadius: "8px", padding: "10px" }}>
           <svg ref={svgRef1}></svg>
         </div>

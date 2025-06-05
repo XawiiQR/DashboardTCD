@@ -15,11 +15,11 @@ interface PieData {
 }
 
 const Grafica2: React.FC<Props> = ({ dataFrame }) => {
-  const svgRef1 = useRef<SVGSVGElement>(null);
-  const svgRef2 = useRef<SVGSVGElement>(null);
-  const legendRef1 = useRef<HTMLDivElement>(null);
-  const legendRef2 = useRef<HTMLDivElement>(null);
-  const [selectedData, setSelectedData] = useState<{dataFrame: dfd.DataFrame, key: string} | null>(null);
+  const svgRef1 = useRef<SVGSVGElement | null>(null); // Mantener `null` como valor inicial para referencias
+  const svgRef2 = useRef<SVGSVGElement | null>(null);
+  const legendRef1 = useRef<HTMLDivElement | null>(null); // Mantener `null` como valor inicial
+  const legendRef2 = useRef<HTMLDivElement | null>(null); // Mantener `null` como valor inicial
+  const [selectedData, setSelectedData] = useState<{ dataFrame: dfd.DataFrame, key: string } | null>(null);
 
   // Color scheme for income brackets
   const colors = {
@@ -75,7 +75,7 @@ const Grafica2: React.FC<Props> = ({ dataFrame }) => {
   const height = 300;
   const radius = Math.min(width, height) / 2 - 20;
 
-  const handleSegmentClick = (data: PieData, isInflow: boolean) => {
+  const handleSegmentClick = (data: PieData, _isInflow: boolean) => {
     setSelectedData({
       dataFrame: dataFrame,
       key: data.key
@@ -83,8 +83,8 @@ const Grafica2: React.FC<Props> = ({ dataFrame }) => {
   };
 
   const drawPieChart = (
-    svgRef: React.RefObject<SVGSVGElement>,
-    legendRef: React.RefObject<HTMLDivElement>,
+    svgRef: React.RefObject<SVGSVGElement | null>, // Mantener null como referencia inicial
+    legendRef: React.RefObject<HTMLDivElement | null>, // Mantener null como referencia inicial
     data: PieData[],
     title: string,
     isInflow: boolean
@@ -92,11 +92,11 @@ const Grafica2: React.FC<Props> = ({ dataFrame }) => {
     if (!svgRef.current || !legendRef.current) return;
 
     // Clear existing elements
-    d3.select(svgRef.current).selectAll("*").remove();
-    legendRef.current.innerHTML = '';
+    d3.select(svgRef.current!).selectAll("*").remove(); // Non-null assertion for svgRef
+    legendRef.current!.innerHTML = ''; // Non-null assertion for legendRef
 
     // Create SVG
-    const svg = d3.select(svgRef.current)
+    const svg = d3.select(svgRef.current!)
       .attr("width", width)
       .attr("height", height + 40)
       .append("g")
@@ -124,7 +124,7 @@ const Grafica2: React.FC<Props> = ({ dataFrame }) => {
       .append("g")
       .attr("class", "arc")
       .style("cursor", "pointer")
-      .on("click", (event, d) => handleSegmentClick(d.data, isInflow));
+      .on("click", (_event, d) => handleSegmentClick(d.data, isInflow));
 
     arcs.append("path")
       .attr("d", arc)
@@ -147,7 +147,7 @@ const Grafica2: React.FC<Props> = ({ dataFrame }) => {
       .style("fill", "#fff");
 
     // Create interactive legend
-    const legend = d3.select(legendRef.current)
+    const legend = d3.select(legendRef.current!)
       .style("display", "flex")
       .style("flex-direction", "column")
       .style("gap", "5px")

@@ -18,17 +18,34 @@ interface TooltipData extends FeatureData {
   y: number;
 }
 
+interface GeoFeature {
+  type: string;
+  geometry: {
+    type: string;
+    coordinates: any;
+  };
+  properties: {
+    GEOID: string;
+    [key: string]: any;
+  };
+}
+
+interface GeoFeatureCollection {
+  type: string;
+  features: GeoFeature[];
+}
+
 const Mapa: React.FC<Props> = ({ dataFrame }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
-  const [geoData, setGeoData] = useState<any>(null);
+  const [geoData, setGeoData] = useState<GeoFeatureCollection | null>(null);
   const [selectedFeature, setSelectedFeature] = useState<TooltipData | null>(null);
   const [clickedFeature, setClickedFeature] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchGeoData = async () => {
       const response = await fetch("/Boston_geo.json");
-      const data = await response.json();
+      const data: GeoFeatureCollection = await response.json();
       setGeoData(data);
     };
 
@@ -54,7 +71,7 @@ const Mapa: React.FC<Props> = ({ dataFrame }) => {
 
       const dfData = dfd.toJSON(dataFrame) as Array<Record<string, any>>;
       const featureDataMap = new Map<string, FeatureData>();
-      
+
       dfData.forEach(item => {
         featureDataMap.set(item.GEOID, {
           GEOID: item.GEOID,
@@ -64,27 +81,29 @@ const Mapa: React.FC<Props> = ({ dataFrame }) => {
         });
       });
 
-      // Función para determinar el color del feature
-      const getFeatureColor = (geoid: string) => {
-        if (geoid === clickedFeature) return "red";
-        return "lightblue";
-      };
+      const getFeatureColor = (geoid: string) =>
+        geoid === clickedFeature ? "red" : "lightblue";
 
       svg.selectAll("path")
         .data(geoData.features)
-        .enter().append("path")
-        .attr("d", path)
-        .attr("fill", d => getFeatureColor(d.properties.GEOID))
+        .enter()
+        .append("path")
+        .attr("d", (d: any) => path(d)!)
+        .attr("fill", function (d: any) {
+          return getFeatureColor(d.properties.GEOID);
+        })
         .attr("stroke", "black")
         .attr("stroke-width", 1)
-        .on("mouseover", function(event, d: any) {
+        .on("mouseover", function (_event, d: GeoFeature) {
           if (d.properties.GEOID !== clickedFeature) {
             d3.select(this).attr("fill", "orange");
           }
 
           const featureData = featureDataMap.get(d.properties.GEOID);
           if (featureData) {
-            const [x, y] = projection([featureData.LONGITUDE, featureData.LATITUDE]);
+            const coords = projection([featureData.LONGITUDE, featureData.LATITUDE]);
+            if (!coords) return;
+            const [x, y] = coords;
             setSelectedFeature({
               ...featureData,
               x: x + margin.left,
@@ -92,72 +111,75 @@ const Mapa: React.FC<Props> = ({ dataFrame }) => {
             });
           }
         })
-        .on("mouseout", function(event, d: any) {
+        .on("mouseout", function (_event, d: GeoFeature) {
           if (d.properties.GEOID !== clickedFeature) {
             d3.select(this).attr("fill", getFeatureColor(d.properties.GEOID));
           }
           setSelectedFeature(null);
         })
-        .on("click", function(event, d: any) {
+        .on("click", function (_event, d: GeoFeature) {
           const clickedGEOID = d.properties.GEOID;
           setClickedFeature(clickedGEOID === clickedFeature ? null : clickedGEOID);
-          
+
           const featureData = featureDataMap.get(clickedGEOID);
           if (featureData) {
-            const [x, y] = projection([featureData.LONGITUDE, featureData.LATITUDE]);
+            const coords = projection([featureData.LONGITUDE, featureData.LATITUDE]);
+            if (!coords) return;
+            const [x, y] = coords;
             setSelectedFeature({
               ...featureData,
               x: x + margin.left,
               y: y + margin.top
             });
           }
-          
-          // Actualizar colores de todos los features
+
           svg.selectAll("path")
-            .attr("fill", (d: any) => getFeatureColor(d.properties.GEOID));
+            .attr("fill", function (d: any) {
+              return getFeatureColor(d.properties.GEOID);
+            });
         });
     }
   }, [geoData, dataFrame, clickedFeature]);
 
   return (
     <div style={{
-      border: '2px solid #4a90e2', 
-      padding: '20px', 
-      borderRadius: '8px', 
-      backgroundColor: '#f7f7f7', 
-      margin: '20px auto', 
-      width: '95%', 
+      border: '2px solid #4a90e2',
+      padding: '20px',
+      borderRadius: '8px',
+      backgroundColor: '#f7f7f7',
+      margin: '20px auto',
+      width: '95%',
       maxWidth: '1100px',
       height: '850px',
-      display: 'flex', 
+      display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'center', 
+      justifyContent: 'center',
       alignItems: 'center',
       position: 'relative'
     }}>
       <h4 style={{ color: '#4a90e2', textAlign: 'center', marginBottom: '20px' }}>
         {clickedFeature ? `Área seleccionada: ${clickedFeature}` : "Componente Mapa con D3.js"}
       </h4>
+
       {geoData ? (
         <>
-          <svg 
-            ref={svgRef} 
-            style={{ 
-              width: '100%', 
-              height: '100%', 
+          <svg
+            ref={svgRef}
+            style={{
+              width: '100%',
+              height: '100%',
               borderRadius: '8px',
               backgroundColor: '#ffffff'
             }}
           ></svg>
-          
-          {/* Tooltip */}
-          {(selectedFeature || (clickedFeature && selectedFeature?.GEOID === clickedFeature)) && (
-            <div 
+
+          {selectedFeature && (
+            <div
               ref={tooltipRef}
               style={{
                 position: 'absolute',
-                left: `${selectedFeature!.x + 10}px`,
-                top: `${selectedFeature!.y + 10}px`,
+                left: `${selectedFeature.x + 10}px`,
+                top: `${selectedFeature.y + 10}px`,
                 backgroundColor: 'white',
                 padding: '10px',
                 border: '1px solid #ddd',
@@ -168,10 +190,10 @@ const Mapa: React.FC<Props> = ({ dataFrame }) => {
                 minWidth: '200px'
               }}
             >
-              <div><strong>GEOID:</strong> {selectedFeature!.GEOID}</div>
-              <div><strong>Latitud:</strong> {selectedFeature!.LATITUDE?.toFixed(6)}</div>
-              <div><strong>Longitud:</strong> {selectedFeature!.LONGITUDE?.toFixed(6)}</div>
-              <div><strong>Población:</strong> {selectedFeature!.total_population?.toLocaleString()}</div>
+              <div><strong>GEOID:</strong> {selectedFeature.GEOID}</div>
+              <div><strong>Latitud:</strong> {selectedFeature.LATITUDE.toFixed(6)}</div>
+              <div><strong>Longitud:</strong> {selectedFeature.LONGITUDE.toFixed(6)}</div>
+              <div><strong>Población:</strong> {selectedFeature.total_population.toLocaleString()}</div>
             </div>
           )}
         </>
@@ -183,5 +205,3 @@ const Mapa: React.FC<Props> = ({ dataFrame }) => {
 };
 
 export default Mapa;
-
-/*esta bien*/
