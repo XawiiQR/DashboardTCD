@@ -38,9 +38,9 @@ const BarraLateral: React.FC<Props> = ({
         case "Botón 1":
           return <Componente4 dataFrame={dataFrame} />;
         case "Botón 2":
-          return <Componente5 dataFrame={dataFrame} />;
+          return <Componente4 dataFrame={dataFrame} />;
         case "Botón 3":
-          return <Componente6 dataFrame={dataFrame} />;
+          return <Componente4 dataFrame={dataFrame} />;
         default:
           return <p>No se ha seleccionado ningún botón válido.</p>;
       }
