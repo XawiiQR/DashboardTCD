@@ -8,10 +8,10 @@ const DanfoExample: React.FC<Props> = ({ setSelectedFile }) => {
   return (
     <div>
       <h2>Seleccionar dataset</h2>
-      <button onClick={() => setSelectedFile("Boston_feature_df.csv")}>
+      <button onClick={() => setSelectedFile("BostonFeatureCT.csv")}>
         Cargar Boston Features
       </button>
-      <button onClick={() => setSelectedFile("BostonMobility2021.csv")}>
+      <button onClick={() => setSelectedFile("BostonMovilityMes.csv")}>
         Cargar Boston Mobility
       </button>
     </div>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import * as dfd from "danfojs";
 import Rangos2 from "./Rangos2"; // Asegúrate de tener este componente
-import DateComponente from "./DateComponente";
+
 import "./Componente1.css"; // Reutilizando los estilos
 
 interface Props {
@@ -9,7 +9,9 @@ interface Props {
 }
 
 const Componente4: React.FC<Props> = ({ dataFrame }) => {
-  const [selectedAttribute, setSelectedAttribute] = useState<string | null>(null);
+  const [selectedAttribute, setSelectedAttribute] = useState<string | null>(
+    null
+  );
 
   // Obtener los nombres de las columnas del DataFrame
   const attributes = dataFrame.columns;
@@ -36,10 +38,8 @@ const Componente4: React.FC<Props> = ({ dataFrame }) => {
       </div>
 
       {/* Mostrar el componente adecuado según el atributo seleccionado */}
-      {selectedAttribute && selectedAttribute === "date_range" ? (
-        <DateComponente dataFrame={dataFrame} />
-      ) : (
-        selectedAttribute && <Rangos2 dataFrame={dataFrame} attribute={selectedAttribute} />
+      {selectedAttribute && (
+        <Rangos2 dataFrame={dataFrame} attribute={selectedAttribute} />
       )}
 
       <h3>Componente 4</h3>

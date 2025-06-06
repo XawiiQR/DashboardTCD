@@ -2,7 +2,6 @@ import React from "react";
 import * as dfd from "danfojs";
 import Componente1 from "./Componente1";
 import Componente2 from "./Componente2";
-import Componente3 from "./Componente3";
 import Componente4 from "./Componente4";
 
 interface Props {
@@ -22,18 +21,18 @@ const BarraLateral: React.FC<Props> = ({
       return <p>No hay acción seleccionada.</p>;
 
     // Combinación de botón y dataset
-    if (selectedFile === "Boston_feature_df.csv") {
+    if (selectedFile === "BostonFeatureCT.csv") {
       switch (activeButton) {
         case "Botón 1":
           return <Componente1 dataFrame={dataFrame} />;
         case "Botón 2":
           return <Componente2 dataFrame={dataFrame} />;
         case "Botón 3":
-          return <Componente3 dataFrame={dataFrame} />;
+          return <Componente2 dataFrame={dataFrame} />;
         default:
           return <p>No se ha seleccionado ningún botón válido.</p>;
       }
-    } else if (selectedFile === "BostonMobility2021.csv") {
+    } else if (selectedFile === "BostonMovilityMes.csv") {
       switch (activeButton) {
         case "Botón 1":
           return <Componente4 dataFrame={dataFrame} />;
